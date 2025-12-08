@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -135,12 +136,16 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       );
     }
 
+    // On Web: use contain to show full frame without cropping
+    // On Mobile: use cover for immersive full-screen experience
+    final boxFit = kIsWeb ? BoxFit.contain : BoxFit.cover;
+
     return Stack(
       fit: StackFit.expand,
       children: [
         // Video player
         FittedBox(
-          fit: BoxFit.cover,
+          fit: boxFit,
           child: SizedBox(
             width: _controller.value.size.width,
             height: _controller.value.size.height,

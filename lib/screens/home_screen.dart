@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import '../services/post_service.dart';
@@ -179,10 +180,34 @@ class _HomeScreenState extends State<HomeScreen> {
             });
           },
           itemBuilder: (context, index) {
-            return VideoFeedItem(
+            final item = VideoFeedItem(
               post: _posts[index],
               isPlaying: index == _currentIndex,
             );
+
+            // On Web: centered 9:16 "phone frame" inside black background
+            if (kIsWeb) {
+              return Container(
+                color: Colors.black,
+                alignment: Alignment.center,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 450),
+                  child: AspectRatio(
+                    aspectRatio: 9 / 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        color: Colors.black,
+                        child: item,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            // Mobile: full-screen behavior
+            return item;
           },
         ),
       ),
