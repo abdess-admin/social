@@ -4,15 +4,11 @@ import 'package:video_player/video_player.dart';
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
   final bool isPlaying;
-  final VoidCallback? onTap;
-  final VoidCallback? onDoubleTap;
 
   const VideoPlayerWidget({
     super.key,
     required this.videoUrl,
     this.isPlaying = false,
-    this.onTap,
-    this.onDoubleTap,
   });
 
   @override
@@ -103,8 +99,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         }
       });
     }
-    
-    widget.onTap?.call();
   }
 
   @override
@@ -140,8 +134,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     }
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: _handleTap,
-      onDoubleTap: widget.onDoubleTap,
       child: Stack(
         fit: StackFit.expand,
         children: [
