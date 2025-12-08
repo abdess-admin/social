@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'upload_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -8,6 +9,14 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  void _openUploadScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UploadScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,11 +49,25 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Video recording & upload\nwill be implemented in Step 4',
+                      'Tap the gallery button below\nto upload a video from your device',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: _openUploadScreen,
+                      icon: const Icon(Icons.upload),
+                      label: const Text('Upload Video'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -94,15 +117,18 @@ class _CameraScreenState extends State<CameraScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Gallery button
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white, width: 2),
+                      // Gallery button - opens upload screen
+                      GestureDetector(
+                        onTap: _openUploadScreen,
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: const Icon(Icons.photo_library, color: Colors.white),
                         ),
-                        child: const Icon(Icons.photo_library, color: Colors.white),
                       ),
                       // Capture button
                       GestureDetector(
