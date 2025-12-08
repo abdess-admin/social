@@ -129,19 +129,17 @@ class _VideoFeedItemState extends State<VideoFeedItem> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onDoubleTap: _handleDoubleTap,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Video player
-          VideoPlayerWidget(
-            videoUrl: widget.post.videoUrl,
-            isPlaying: widget.isPlaying,
-          ),
-          
-          // Like animation overlay
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Video player (handles tap and double-tap internally via overlay)
+        VideoPlayerWidget(
+          videoUrl: widget.post.videoUrl,
+          isPlaying: widget.isPlaying,
+          onDoubleTap: _handleDoubleTap,
+        ),
+        
+        // Like animation overlay
         if (_showLikeAnimation)
           Center(
             child: AnimatedBuilder(
@@ -303,8 +301,7 @@ class _VideoFeedItemState extends State<VideoFeedItem> with SingleTickerProvider
             ],
           ),
         ),
-        ],
-      ),
+      ],
     );
   }
 }

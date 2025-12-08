@@ -4,11 +4,13 @@ import 'package:video_player/video_player.dart';
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
   final bool isPlaying;
+  final VoidCallback? onDoubleTap;
 
   const VideoPlayerWidget({
     super.key,
     required this.videoUrl,
     this.isPlaying = false,
+    this.onDoubleTap,
   });
 
   @override
@@ -133,58 +135,65 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       );
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _handleTap,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Video player
-          FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Video player
+        FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: _controller.value.size.width,
+            height: _controller.value.size.height,
+            child: VideoPlayer(_controller),
+          ),
+        ),
+        // Transparent tap/double-tap overlay (on top of video for Web compatibility)
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _handleTap,
+            onDoubleTap: widget.onDoubleTap,
+            child: Container(
+              color: Colors.transparent,
             ),
           ),
-          // Play/Pause icon overlay
-          if (_showPlayPauseIcon)
-            Center(
-              child: AnimatedOpacity(
-                opacity: _showPlayPauseIcon ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 200),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 48,
-                  ),
+        ),
+        // Play/Pause icon overlay
+        if (_showPlayPauseIcon)
+          Center(
+            child: AnimatedOpacity(
+              opacity: _showPlayPauseIcon ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                  size: 48,
                 ),
               ),
             ),
-          // Progress indicator at bottom
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: VideoProgressIndicator(
-              _controller,
-              allowScrubbing: false,
-              colors: const VideoProgressColors(
-                playedColor: Colors.white,
-                bufferedColor: Colors.white24,
-                backgroundColor: Colors.white10,
-              ),
+          ),
+        // Progress indicator at bottom
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: VideoProgressIndicator(
+            _controller,
+            allowScrubbing: false,
+            colors: const VideoProgressColors(
+              playedColor: Colors.white,
+              bufferedColor: Colors.white24,
+              backgroundColor: Colors.white10,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
