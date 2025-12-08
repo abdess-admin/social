@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/post_model.dart';
 import '../providers/auth_provider.dart';
 import '../services/post_service.dart';
+import 'comments_bottom_sheet.dart';
 import 'video_player_widget.dart';
 
 class VideoFeedItem extends StatefulWidget {
@@ -23,6 +24,7 @@ class _VideoFeedItemState extends State<VideoFeedItem> with SingleTickerProvider
   final PostService _postService = PostService();
   bool _isLiked = false;
   int _likesCount = 0;
+  int _commentsCount = 0;
   bool _showLikeAnimation = false;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
@@ -31,6 +33,7 @@ class _VideoFeedItemState extends State<VideoFeedItem> with SingleTickerProvider
   void initState() {
     super.initState();
     _likesCount = widget.post.likesCount;
+    _commentsCount = widget.post.commentsCount;
     _checkIfLiked();
     
     _likeAnimationController = AnimationController(
@@ -272,15 +275,9 @@ class _VideoFeedItemState extends State<VideoFeedItem> with SingleTickerProvider
               // Comments button
               _ActionButton(
                 icon: Icons.chat_bubble_outline,
-                label: _formatCount(widget.post.commentsCount),
+                label: _formatCount(_commentsCount),
                 onTap: () {
-                  // TODO: Open comments
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Comments coming in Step 5'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  CommentsBottomSheet.show(context, widget.post.id);
                 },
               ),
               const SizedBox(height: 20),
