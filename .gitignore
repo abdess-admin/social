@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Firebase configuration (contains API keys)
+# Copy firebase_options.template.dart to firebase_options.dart and add your config
+lib/firebase_options.dart
+
 # Symbolication related
 app.*.symbols
 
