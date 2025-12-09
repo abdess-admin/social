@@ -11,11 +11,12 @@ class StoryService {
   Stream<List<UserStories>> getActiveStoriesByUserStream() {
     final now = DateTime.now();
     
+    // Note: Only orderBy expiresAt to avoid needing composite index
+    // Secondary sorting by createdAt is done in _groupStoriesByUser
     return _firestore
         .collectionGroup('items')
         .where('expiresAt', isGreaterThan: Timestamp.fromDate(now))
         .orderBy('expiresAt')
-        .orderBy('createdAt')
         .snapshots()
         .map((snapshot) {
           final stories = snapshot.docs
@@ -30,11 +31,12 @@ class StoryService {
   Future<List<UserStories>> getActiveStoriesByUser() async {
     final now = DateTime.now();
     
+    // Note: Only orderBy expiresAt to avoid needing composite index
+    // Secondary sorting by createdAt is done in _groupStoriesByUser
     final snapshot = await _firestore
         .collectionGroup('items')
         .where('expiresAt', isGreaterThan: Timestamp.fromDate(now))
         .orderBy('expiresAt')
-        .orderBy('createdAt')
         .get();
     
     final stories = snapshot.docs
@@ -72,30 +74,38 @@ class StoryService {
   Stream<List<StoryModel>> getUserStoriesStream(String userId) {
     final now = DateTime.now();
     
+    // Note: Only orderBy expiresAt to avoid needing composite index
+    // Secondary sorting by createdAt is done client-side
     return _userStoriesCollection(userId)
         .where('expiresAt', isGreaterThan: Timestamp.fromDate(now))
         .orderBy('expiresAt')
-        .orderBy('createdAt')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => StoryModel.fromFirestore(doc))
-            .where((story) => !story.isExpired)
-            .toList());
+        .map((snapshot) {
+          final stories = snapshot.docs
+              .map((doc) => StoryModel.fromFirestore(doc))
+              .where((story) => !story.isExpired)
+              .toList();
+          stories.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          return stories;
+        });
   }
 
   Future<List<StoryModel>> getUserStories(String userId) async {
     final now = DateTime.now();
     
+    // Note: Only orderBy expiresAt to avoid needing composite index
+    // Secondary sorting by createdAt is done client-side
     final snapshot = await _userStoriesCollection(userId)
         .where('expiresAt', isGreaterThan: Timestamp.fromDate(now))
         .orderBy('expiresAt')
-        .orderBy('createdAt')
         .get();
     
-    return snapshot.docs
+    final stories = snapshot.docs
         .map((doc) => StoryModel.fromFirestore(doc))
         .where((story) => !story.isExpired)
         .toList();
+    stories.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return stories;
   }
 
   Future<String> createStory({

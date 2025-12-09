@@ -55,10 +55,24 @@ class _StoriesScreenState extends State<StoriesScreen> {
       body: StreamBuilder<List<UserStories>>(
         stream: _storyService.getActiveStoriesByUserStream(),
         builder: (context, snapshot) {
+          // Debug logging
+          debugPrint('Stories snapshot - connectionState: ${snapshot.connectionState}, hasError: ${snapshot.hasError}, hasData: ${snapshot.hasData}');
+          if (snapshot.hasError) {
+            debugPrint('Stories error: ${snapshot.error}');
+          }
+          if (snapshot.hasData) {
+            debugPrint('Stories count: ${snapshot.data?.length ?? 0}');
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(color: Colors.white),
             );
+          }
+
+          // Show error state if there's an error
+          if (snapshot.hasError) {
+            return _buildErrorState(snapshot.error.toString());
           }
 
           final userStoriesList = snapshot.data ?? [];
@@ -69,6 +83,54 @@ class _StoriesScreenState extends State<StoriesScreen> {
 
           return _buildStoriesList(userStoriesList);
         },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 80,
+              color: Colors.red[400],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Error Loading Stories',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 12,
+              ),
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => setState(() {}),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
