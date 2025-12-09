@@ -69,4 +69,52 @@ class StorageService {
     final downloadUrl = await ref.getDownloadURL();
     return downloadUrl;
   }
+
+  Future<String> uploadStoryMedia({
+    required String userId,
+    required Uint8List mediaBytes,
+    required String fileName,
+    required bool isVideo,
+    void Function(double progress)? onProgress,
+  }) async {
+    final storyId = _uuid.v4();
+    final extension = fileName.split('.').last.toLowerCase();
+    final storagePath = 'stories/$userId/$storyId.$extension';
+    
+    final ref = _storage.ref().child(storagePath);
+    
+    final contentType = isVideo ? 'video/$extension' : 'image/$extension';
+    final metadata = SettableMetadata(
+      contentType: contentType,
+      customMetadata: {
+        'userId': userId,
+        'storyId': storyId,
+        'uploadedAt': DateTime.now().toIso8601String(),
+        'mediaType': isVideo ? 'video' : 'image',
+      },
+    );
+    
+    final uploadTask = ref.putData(mediaBytes, metadata);
+    
+    if (onProgress != null) {
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        onProgress(progress);
+      });
+    }
+    
+    await uploadTask;
+    
+    final downloadUrl = await ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  Future<void> deleteStoryMedia(String mediaUrl) async {
+    try {
+      final ref = _storage.refFromURL(mediaUrl);
+      await ref.delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
